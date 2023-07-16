@@ -1,22 +1,19 @@
 #include <algorithm>
-#include <array>
 #include <complex>
-#include <iomanip>
 #include <iostream>
-#include <map>
-#include <numeric>
-#include <tuple>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 using position = std::complex<int>;
 
-struct comp {
-    bool operator()(position const &a, position const &b) const {
-        return std::tuple(a.real(), a.imag()) < std::tuple(b.real(), b.imag());
+struct hash {
+    size_t operator()(position const &a) const {
+        return std::hash<int>{}(a.real()) * 31 ^ std::hash<int>{}(a.imag());
     }
 };
 
-using map = std::map<position, bool, comp>;
+using map = std::unordered_map<position, bool, hash>;
 
 int part_one(map board) {
     position lowest_pos = board.begin()->first;
@@ -29,10 +26,10 @@ int part_one(map board) {
     for (int sand_count = 0;; ++sand_count) {
         position sand_pos{0, 500};
         while (sand_pos.real() <= lowest_pos.real()) {
-            if (board[{sand_pos + down}]) {
-                if (board[{sand_pos + down_left}]) {
-                    if (board[{sand_pos + down_right}]) {
-                        goto brk;
+            if (board[sand_pos + down]) {
+                if (board[sand_pos + down_left]) {
+                    if (board[sand_pos + down_right]) {
+                        break;
                     } else {
                         sand_pos += down_right;
                     }
@@ -43,7 +40,6 @@ int part_one(map board) {
                 sand_pos += down;
             }
         }
-    brk:;
         if (sand_pos.real() > lowest_pos.real()) {
             return sand_count;
         } else {
@@ -66,10 +62,10 @@ int part_two(map board) {
         if (board[sand_pos])
             return sand_count;
         while (sand_pos.real() < lowest_pos.real()) {
-            if (board[{sand_pos + down}]) {
-                if (board[{sand_pos + down_left}]) {
-                    if (board[{sand_pos + down_right}]) {
-                        goto brk;
+            if (board[sand_pos + down]) {
+                if (board[sand_pos + down_left]) {
+                    if (board[sand_pos + down_right]) {
+                        break;
                     } else {
                         sand_pos += down_right;
                     }
@@ -80,7 +76,6 @@ int part_two(map board) {
                 sand_pos += down;
             }
         }
-    brk:;
         board[sand_pos] = true;
     }
     return -1;
@@ -112,5 +107,4 @@ int main() {
 
     std::cout << "Part one: " << part_one(board) << '\n';
     std::cout << "Part two: " << part_two(board) << '\n';
-
 }
