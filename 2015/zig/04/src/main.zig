@@ -38,7 +38,7 @@ fn part_two(input: []u8) !usize {
 
 pub fn main() !void {
     const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);    
+    var bw = std.io.bufferedWriter(stdout_file);
     const stdout = bw.writer();
     const stdin_file = std.io.getStdIn().reader();
     var stdin = std.io.bufferedReader(stdin_file);
