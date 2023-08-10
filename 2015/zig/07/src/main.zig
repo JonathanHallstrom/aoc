@@ -179,8 +179,9 @@ pub fn main() !void {
                 break;
             }
         }
-        if (op.tp == .UNINITIALIZED)
+        if (op.tp == .UNINITIALIZED) {
             op.tp = .ASSIGNMENT;
+        }
 
         if (op.tp == .NOT) {
             _ = token_iter.next();
