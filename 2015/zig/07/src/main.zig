@@ -123,6 +123,9 @@ fn part_one(input: []operation) !usize {
     for (input) |op| {
         source[op.result_operand.variable] = op;
     }
+    for (0..cache.len) |i| {
+        cache[i] = null;
+    }
     return compute(1, source);
 }
 
@@ -134,8 +137,11 @@ fn part_two(input: []operation) !usize {
     for (input) |op| {
         source[op.result_operand.variable] = op;
     }
+    for (0..cache.len) |i| {
+        cache[i] = null;
+    }
     const a_outp = compute(1, source);
-    
+
     for (0..cache.len) |i| {
         cache[i] = null;
     }
@@ -164,53 +170,30 @@ pub fn main() !void {
     var lines = std.mem.tokenize(u8, input, "\n");
 
     while (lines.next()) |line| {
-        var op: operation = undefined;
+        var op: operation = .{};
         var token_iter = std.mem.tokenize(u8, line, " ");
-        if (contains_slice(u8, line, "NOT")) {
-            op = .{ .tp = .NOT };
-            _ = token_iter.next();
-            op.first_operand = parse(token_iter.next().?);
-            _ = token_iter.next();
-            op.result_operand = parse(token_iter.next().?);
-        } else if (contains_slice(u8, line, "AND")) {
-            op = .{ .tp = .AND };
-            op.first_operand = parse(token_iter.next().?);
-            _ = token_iter.next();
-            op.second_operand = parse(token_iter.next().?);
-            _ = token_iter.next();
-            op.result_operand = parse(token_iter.next().?);
-        } else if (contains_slice(u8, line, "OR")) {
-            op = .{ .tp = .OR };
-            op.first_operand = parse(token_iter.next().?);
-            _ = token_iter.next();
-            op.second_operand = parse(token_iter.next().?);
-            _ = token_iter.next();
-            op.result_operand = parse(token_iter.next().?);
-        } else if (contains_slice(u8, line, "LSHIFT")) {
-            op = .{ .tp = .LSHIFT };
-            op.first_operand = parse(token_iter.next().?);
-            _ = token_iter.next();
-            op.second_operand = parse(token_iter.next().?);
-            _ = token_iter.next();
-            op.result_operand = parse(token_iter.next().?);
-        } else if (contains_slice(u8, line, "RSHIFT")) {
-            op = .{ .tp = .RSHIFT };
-            op.first_operand = parse(token_iter.next().?);
-            _ = token_iter.next();
-            op.second_operand = parse(token_iter.next().?);
-            _ = token_iter.next();
-            op.result_operand = parse(token_iter.next().?);
-        } else {
-            op = .{ .tp = .ASSIGNMENT };
-            op.first_operand = parse(token_iter.next().?);
-            _ = token_iter.next();
-            op.result_operand = parse(token_iter.next().?);
-        }
-        try operations.append(op);
-    }
 
-    for (0..cache.len) |i| {
-        cache[i] = null;
+        inline for ([_]logical_op{ .NOT, .LSHIFT, .RSHIFT, .AND, .OR, .ASSIGNMENT }) |tp| {
+            if (contains_slice(u8, line, @tagName(tp))) {
+                op.tp = tp;
+                break;
+            }
+        }
+        if (op.tp == .UNINITIALIZED)
+            op.tp = .ASSIGNMENT;
+
+        if (op.tp == .NOT) {
+            _ = token_iter.next();
+        }
+        op.first_operand = parse(token_iter.next().?);
+        if (op.tp != .NOT and op.tp != .ASSIGNMENT) {
+            _ = token_iter.next();
+            op.second_operand = parse(token_iter.next().?);
+        }
+        _ = token_iter.next();
+        op.result_operand = parse(token_iter.next().?);
+
+        try operations.append(op);
     }
 
     try stdout.print("Part one: {!}\n", .{part_one(operations.items)});
